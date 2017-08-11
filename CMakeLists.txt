@@ -19,7 +19,8 @@ include(ICUBcontribHelpers)
 include(ICUBcontribOptions)
 icubcontrib_set_default_prefix()
 
-add_definitions(${YARP_DEFINES})   # add yarp definitions - this contains also -D_REENTRANT
+# add yarp definitions - this contains also -D_REENTRANT
+add_definitions(${YARP_DEFINES})   
 
 ## then apps
 add_subdirectory(app)
@@ -40,7 +41,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include
                     ${OpenCV_INCLUDE_DIRS}
                     )
 
-add_executable(${PROJECTNAME} ${source} ${header})
+add_executable(${PROJECTNAME} ${source} ${header} ${idl})
 target_link_libraries(${PROJECTNAME} ${YARP_LIBRARIES} ${OpenCV_LIBRARIES})
 install(TARGETS ${PROJECTNAME} DESTINATION bin)
 

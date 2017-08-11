@@ -1,5 +1,6 @@
 *~
 *IDLServer.*
+*thrift.cmake
 
 ## generic files to ignore
 *.lock

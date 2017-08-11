@@ -35,6 +35,9 @@
 #include <yarp/sig/all.h>
 #include <yarp/math/Rand.h>
 #include <yarp/math/Math.h>
+#include <yarp/os/Node.h>
+#include <yarp/os/Subscriber.h>
+#include <yarp/os/Publisher.h>
 
 
 #include <OTFR_ROS_IDLServer.h>
@@ -61,6 +64,16 @@ protected:
     /* Ports Img */
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >	imgInPort;		// Receives disparity greyscale image --- Handled by the clas itself
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >	imgOutPort;	        // output image Port with info drawn over
+
+
+    /* ROS related types: */
+    /* creates a node called /yarp/listener */
+    yarp::os::Node *node;
+
+    /* subscribe to topic chatter */
+    yarp::os::Subscriber<yarp::sig::ImageOf<yarp::sig::PixelRgb> > subscriber;
+    yarp::sig::ImageOf<yarp::sig::PixelRgb> imgIn;
+
 
 
     /* class variables */

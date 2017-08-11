@@ -57,6 +57,20 @@ bool  OTFR_ROS::configure(ResourceFinder &rf)
     }
     attach(rpcInPort);
 
+
+    /* CONFIGURE ROS VARIABLES */
+    /* creates a node called /yarp/listener */
+    node = new Node("/yarp/listener");
+    //node.prepare("/yarp/listener");
+
+    /* subscribe to topic chatter */
+    if (!subscriber.topic("/multisense/left/image_rect_color")) {
+           cerr<< "/multisense/left/image_rect_color\n";
+           return -1;
+       }
+
+
+
     /* Module rpc parameters */
     closing = false;
 
@@ -71,6 +85,22 @@ bool  OTFR_ROS::configure(ResourceFinder &rf)
 
 bool  OTFR_ROS::updateModule()
 {
+     /* read data from the topic */
+    subscriber.read(imgIn);
+
+    cout << "Image read of width " << imgIn.width() << " and height "<< imgIn.width() << endl;
+
+
+    // Put the input image at the moment of computing out
+    printf("Propagating image!!\n");
+
+    ImageOf<PixelRgb> &imgOut  = imgOutPort.prepare();
+    imgOut = imgIn;
+    imgOutPort.write();
+
+
+
+/*
     // read if there is any new affordance data. If so, update aff for active label
     Bottle *affBottle = dataInPort.read(false);
     if (affBottle!=NULL){
@@ -94,7 +124,7 @@ bool  OTFR_ROS::updateModule()
         // Things get done here
         labelOutPort.write();
     }
-
+*/
     return !closing;
 }
 

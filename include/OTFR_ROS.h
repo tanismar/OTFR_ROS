@@ -39,8 +39,12 @@
 #include <yarp/os/Subscriber.h>
 #include <yarp/os/Publisher.h>
 
-
+// ROS related libs
 #include <OTFR_ROS_IDLServer.h>
+#include <sensor_msgs_Image.h>
+#include <stereo_msgs_DisparityImage.h>
+
+
 
 /**********************************************************
     PUBLIC METHODS
@@ -57,22 +61,38 @@ protected:
     yarp::os::RpcServer rpcInPort;                                      // port to handle incoming commands
 
     /* Ports data */
-    yarp::os::BufferedPort<yarp::os::Bottle> dataInPort;             // Receives pairs of action-effect information to update affordance information
-    yarp::os::BufferedPort<yarp::os::Bottle> labelsInPort;          // Receives labels for affordances
-    yarp::os::BufferedPort<yarp::os::Bottle> labelOutPort;            // Streams the success rate (affordances) of the active label
+
+    typedef yarp::sig::ImageOf<yarp::sig::PixelRgb> typeIm;
+    typedef yarp::sig::ImageOf<yarp::sig::PixelFloat> typeDepth;
 
     /* Ports Img */
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >	imgInPort;		// Receives disparity greyscale image --- Handled by the clas itself
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >	imgOutPort;	        // output image Port with info drawn over
-
+    yarp::os::BufferedPort<typeIm >                                     imgOutPort;             // outputs camera image (RGB)
+    yarp::os::BufferedPort<typeDepth >                                  depthOutPort;            // outputs depth image (mono)
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelFloat> >  depthOutPort_ros;
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelFloat> >  dispOutPort;
 
     /* ROS related types: */
-    /* creates a node called /yarp/listener */
-    yarp::os::Node *node;
 
-    /* subscribe to topic chatter */
-    yarp::os::Subscriber<yarp::sig::ImageOf<yarp::sig::PixelRgb> > subscriber;
-    yarp::sig::ImageOf<yarp::sig::PixelRgb> imgIn;
+    /* subscribe to ROS topic */
+    yarp::os::Subscriber<typeIm >                       subs_img;
+    yarp::os::Subscriber<typeDepth>                     subs_depth;
+    yarp::os::Subscriber<sensor_msgs_Image>             subs_depth_ros;
+    yarp::os::Subscriber<stereo_msgs_DisparityImage >   subs_disp;
+
+
+    /* Image types to read and propagate*/
+    typeIm                                      imgIn;
+    typeDepth                                   depthIn;
+    sensor_msgs_Image                           depthIn_ros;
+    stereo_msgs_DisparityImage                  dispIn;
+
+    /* creates a node for the image and another for the disparity */
+    yarp::os::Node *node_yarp;
+
+    bool img_flag;
+    bool depth_flag;
+    bool depth_ros_flag;
+    bool disp_flag;
 
 
 
@@ -80,26 +100,16 @@ protected:
 
     bool verb;
     bool closing;
-    int activeLabel;
-
-    std::string filepath;   // path for the memory file
-    std::string filename;    // name for the memory file
-
-    std::vector < std::string>  knownLabels;                        // maps string labels to index in affordance matrix
-    std::vector < std::vector < std::vector <double> > > affHist;   // Keeps track of all effects, for all acts and all labels: affHist[labI][act].push_back(eff)
-    std::vector < std::vector < double> > knownAffsVar;             // Saves the variance of the learned affordances, to allow for active learning (higher variance means less certainity about action outcome).
 
     /* functions*/
 
     // Private Functions
 
     // Helper functions
-    double                      vecAvg(const std::vector<double>& vec);
 
 public:
 
-    // RPC Accesible methods
-    bool                        setnumact(const int numAct);
+    // RPC Accesible methods    
     bool						quit();
 
     // RF modules overrides

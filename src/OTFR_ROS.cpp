@@ -37,12 +37,10 @@ bool  OTFR_ROS::configure(ResourceFinder &rf)
 
     //open ports
     bool ret = true;
-    ret = ret && dataInPort.open(("/"+name+"/data:i").c_str());         // Receives data
-    ret = ret && labelsInPort.open(("/"+name+"/labels:i").c_str());     // Receives labels for data
-    ret = ret && labelOutPort.open(("/"+name+"/labels:o").c_str());     // Streams predicted labels
-
-    ret = ret && imgInPort.open(("/"+name+"/img:i").c_str());           // Receives images
     ret = ret && imgOutPort.open(("/"+name+"/img:o").c_str());          // Streams images
+    ret = ret && dispOutPort.open(("/"+name+"/disp:o").c_str());          // Streams diparity image
+    ret = ret && depthOutPort.open(("/"+name+"/depth:o").c_str());          // Streams diparity image
+    ret = ret && depthOutPort_ros.open(("/"+name+"/depth_ros:o").c_str());          // Streams diparity image
     if (!ret){
         printf("Problems opening ports\n");
         return false;
@@ -59,24 +57,42 @@ bool  OTFR_ROS::configure(ResourceFinder &rf)
 
 
     /* CONFIGURE ROS VARIABLES */
+    img_flag = true;
+    depth_flag = false;
+    depth_ros_flag = false;
+    disp_flag = true;
+
+
     /* creates a node called /yarp/listener */
-    node = new Node("/yarp/listener");
+    node_yarp = new Node("/yarp/node");
+
     //node.prepare("/yarp/listener");
 
-    /* subscribe to topic chatter */
-    if (!subscriber.topic("/multisense/left/image_rect_color")) {
-           cerr<< "/multisense/left/image_rect_color\n";
-           return -1;
-       }
+    /* subscribe to ROS topics */
 
+    if (img_flag == true){
+    if (!subs_img.topic("/multisense/left/image_rect_color")) {
+           cerr<< "/multisense/left/image_rect_color" << endl;
+           return -1;       }}
+
+    if (depth_flag == true){
+    if (!subs_depth.topic("/multisense/depth")) {
+           cerr<< "/multisense/depth" << endl;
+           return -1;       }}
+
+    if (depth_ros_flag == true){
+    if (!subs_depth_ros.topic("/multisense/depth")) {
+           cerr<< "/multisense/depth" << endl;
+           return -1;       }}
+
+    if (disp_flag == true){
+    if (!subs_disp.topic("/multisense/left/disparity_image")) {
+           cerr<< "/multisense/left/disparity_image" << endl;
+           return -1;       }}
 
 
     /* Module rpc parameters */
     closing = false;
-
-    /*Init variables*/
-    activeLabel = -1;
-
 
     cout << endl << "Configuring done."<<endl;
 
@@ -85,65 +101,71 @@ bool  OTFR_ROS::configure(ResourceFinder &rf)
 
 bool  OTFR_ROS::updateModule()
 {
-     /* read data from the topic */
-    subscriber.read(imgIn);
+     /* read data from the ROS topics */
+    if (img_flag == true){
+        subs_img.read(imgIn);
+        cout << "Image pixel type " << imgIn.getPixelCode() << endl;
+        cout << "Image read of width " << imgIn.width() << " and height "<< imgIn.height() << endl;
 
-    cout << "Image read of width " << imgIn.width() << " and height "<< imgIn.width() << endl;
-
-
-    // Put the input image at the moment of computing out
-    printf("Propagating image!!\n");
-
-    ImageOf<PixelRgb> &imgOut  = imgOutPort.prepare();
-    imgOut = imgIn;
-    imgOutPort.write();
-
-
-
-/*
-    // read if there is any new affordance data. If so, update aff for active label
-    Bottle *affBottle = dataInPort.read(false);
-    if (affBottle!=NULL){
-        cout << "Affordance read" << endl;
-        int act = affBottle->get(0).asInt();
-        double eff = affBottle->get(1).asDouble();        
+        printf("Propagating image!!\n");
+        typeIm &imgOut  = imgOutPort.prepare();
+        imgOut = imgIn;
+        imgOutPort.write();
     }
 
-    // read if there is any new label.
-    Bottle *labelBottle = labelsInPort.read(false);
-    if (labelBottle!=NULL){
-        cout << "Label read" << endl;
-        string label = labelBottle->get(0).asString();        
+    if (depth_flag ==true){
+        subs_depth.read(depthIn);
+        cout << "Depth pixel type " << depthIn.getPixelCode()<< endl;
+        cout << "Depth read of width " << depthIn.width() << " and height "<< depthIn.height() << endl;
+
+        printf("Propagating depth!!\n");
+        typeDepth &depthOut  = depthOutPort.prepare();
+        depthOut = depthIn;
+        depthOutPort.write();
     }
 
-    // Stream affordances of active label
-    if (activeLabel >=0) {
-        //cout << "Streaming affordance" << endl;
-        Bottle &affBotOut = labelOutPort.prepare();
-        affBotOut.clear();
-        // Things get done here
-        labelOutPort.write();
+    if (depth_ros_flag ==true){
+        subs_depth_ros.read(depthIn_ros);
+        cout << "Read depth_ros with encoding: " << depthIn_ros.encoding << endl;
+        cout << "Depth_ros read of width " << depthIn_ros.width << " and height "<< depthIn_ros.height << endl;
+
+        printf("Propagating depth_ros!!\n");
+        ImageOf<PixelFloat> &depthOut_ros  = depthOutPort_ros.prepare();
+        depthOut_ros.setExternal(depthIn_ros.data.data(), depthIn_ros.width, depthIn_ros.height);
+        depthOutPort_ros.write();
     }
-*/
+
+    if (disp_flag == true){
+        subs_disp.read(dispIn);
+        cout << "Read disp with encoding: " << dispIn.image.encoding << endl;
+        cout << "Disp read of width " << dispIn.image.width<< " and height "<< dispIn.image.height << endl;
+
+        printf("Propagating disp!!\n");
+        ImageOf<PixelFloat> &dispOut  = dispOutPort.prepare();
+        dispOut.setExternal(dispIn.image.data.data(), dispIn.image.width, dispIn.image.height);
+        dispOutPort.write();
+    }
+
     return !closing;
 }
 
 
 double  OTFR_ROS::getPeriod()
 {
-    return 0.1; //module periodicity (seconds)
+    return 0.2; //module periodicity (seconds)
 }
 
 
 bool  OTFR_ROS::interruptModule()
 {
     closing = true;
-    dataInPort.interrupt();
-    labelsInPort.interrupt();
-    labelOutPort.interrupt();
 
-    imgInPort.interrupt();
+//    imgInPort.interrupt();
     imgOutPort.interrupt();
+    depthOutPort.interrupt();
+    depthOutPort_ros.interrupt();
+    dispOutPort.interrupt();
+
 
     cout << "Ports interrupted" << endl;
     return true;
@@ -152,12 +174,13 @@ bool  OTFR_ROS::interruptModule()
 
 bool  OTFR_ROS::close()
 {
-    dataInPort.close();
-    labelsInPort.close();
-    labelOutPort.close();
 
-    imgInPort.close();
     imgOutPort.close();
+    dispOutPort.close();
+    depthOutPort.close();
+    depthOutPort_ros.close();
+
+    delete node_yarp;
 
     cout << "Module ports closed" << endl;
     return true;
@@ -175,10 +198,6 @@ bool  OTFR_ROS::attach(RpcServer &source)
 
 // RPC Accesible via trhift.
 /**********************************************************/
-bool OTFR_ROS::setnumact(const int num)
-{
-
-}
 
 
 /***************** MORE PUBLIC METHODS **************/
@@ -196,10 +215,6 @@ bool OTFR_ROS::quit()
 /**********************************************************/
 
 /***************** Helper Functions *************************************/
-double OTFR_ROS::vecAvg (const vector<double>& vec )
-{
-
-}
 
 /***************** MORE PRIVATE METHOTS**************/
 

@@ -21,29 +21,18 @@
 
 // Includes
 #include <iostream>
-#include <iterator>
-#include <fstream>
-#include <sstream>
-#include <algorithm>
-#include <math.h>
-#include <vector>
-#include <ctime>
-#include <map>
 
 // YARP - iCub libs
 #include <yarp/os/all.h>
 #include <yarp/sig/all.h>
-#include <yarp/math/Rand.h>
-#include <yarp/math/Math.h>
 #include <yarp/os/Node.h>
-#include <yarp/os/Subscriber.h>
-#include <yarp/os/Publisher.h>
 
 // ROS related libs
 #include <OTFR_ROS_IDLServer.h>
-#include <sensor_msgs_Image.h>
-#include <stereo_msgs_DisparityImage.h>
 
+// Threads
+#include "imThread.h"
+#include "dispThread.h"
 
 
 /**********************************************************
@@ -59,42 +48,18 @@ protected:
 
     /* Ports RPC */
     yarp::os::RpcServer rpcInPort;                                      // port to handle incoming commands
+    ImThread *imThrd;
+    DispThread *dispThrd;
 
-    /* Ports data */
-
-    typedef yarp::sig::ImageOf<yarp::sig::PixelRgb> typeIm;
-    typedef yarp::sig::ImageOf<yarp::sig::PixelFloat> typeDepth;
-
-    /* Ports Img */
-    yarp::os::BufferedPort<typeIm >                                     imgOutPort;             // outputs camera image (RGB)
-    yarp::os::BufferedPort<typeDepth >                                  depthOutPort;            // outputs depth image (mono)
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelFloat> >  depthOutPort_ros;
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelFloat> >  dispOutPort;
 
     /* ROS related types: */
 
-    /* subscribe to ROS topic */
-    yarp::os::Subscriber<typeIm >                       subs_img;
-    yarp::os::Subscriber<typeDepth>                     subs_depth;
-    yarp::os::Subscriber<sensor_msgs_Image>             subs_depth_ros;
-    yarp::os::Subscriber<stereo_msgs_DisparityImage >   subs_disp;
-
-
-    /* Image types to read and propagate*/
-    typeIm                                      imgIn;
-    typeDepth                                   depthIn;
-    sensor_msgs_Image                           depthIn_ros;
-    stereo_msgs_DisparityImage                  dispIn;
 
     /* creates a node for the image and another for the disparity */
     yarp::os::Node *node_yarp;
 
     bool img_flag;
-    bool depth_flag;
-    bool depth_ros_flag;
     bool disp_flag;
-
-
 
     /* class variables */
 

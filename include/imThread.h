@@ -47,6 +47,8 @@ protected:
     yarp::os::Subscriber<typeIm >               subs_img;
     typeIm                                      imgIn;
 
+    bool gettingInput;
+
 
 public:
     // CONSTRUCTOR

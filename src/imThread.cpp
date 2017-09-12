@@ -21,7 +21,10 @@ bool ImThread::threadInit()
            cerr<< "/multisense/left/image_rect_color" << endl;
            return -1;       }
 
+    gettingInput = true;
+
     cout << "Img thread running" << endl;
+
 
     return true;
 }
@@ -31,13 +34,21 @@ void ImThread::run()
     if(subs_img.getInputCount()) {
         subs_img.read(imgIn);
 
-        cout << "Read ROS image of size " <<  imgIn.height() << " x " << imgIn.width() << endl;
+        if (gettingInput == false) {
+            cout << "Reading ROS image of size " <<  imgIn.height() << " x " << imgIn.width() << endl;
+            gettingInput = true;
+        }
+
         typeIm &imgOut  = imgOutPort.prepare();
         imgOut = imgIn;
         imgOutPort.write();
     } else {
-        cout << "No image input connected\n";
+        if (gettingInput == true){
+            cout << "Waiting to read ROS image (might take up to a minute)" << endl;
+            gettingInput = false;
+        }
     }
+
     return;
 }
 

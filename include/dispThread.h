@@ -46,6 +46,8 @@ protected:
     yarp::os::Subscriber<stereo_msgs_DisparityImage >   subs_disp;
     stereo_msgs_DisparityImage                  dispIn;
 
+    bool gettingInput;
+
 
 public:
     // CONSTRUCTOR

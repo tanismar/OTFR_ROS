@@ -23,6 +23,8 @@ bool DispThread::threadInit()
 
     cout << "Disp thread running" << endl;
 
+    gettingInput = true;
+
     return true;
 }
 
@@ -30,14 +32,22 @@ void DispThread::run()
 {
     if(subs_disp.getInputCount()) {
         subs_disp.read(dispIn);
-        cout << "Disp read" << endl;
+
+        if (gettingInput == false){
+            cout << "Reading ROS disparity input of size (HxW): " << dispIn.image.height << " x " << dispIn.image.width << endl;
+            gettingInput = true;
+        }
 
         typeDepth &dispOut  = dispOutPort.prepare();
         dispOut.setExternal(dispIn.image.data.data(), dispIn.image.width, dispIn.image.height);
         dispOutPort.write();
-    } else {
-        cout << "No disparity input connected\n";
+    }else{
+        if (gettingInput == true){
+            cout << "Waiting to read ROS disparity (might take up to a minute)" << endl;
+            gettingInput = false;
+        }
     }
+
     return;
 }
 

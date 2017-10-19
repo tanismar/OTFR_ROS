@@ -33,6 +33,7 @@
 // Threads
 #include "imThread.h"
 #include "dispThread.h"
+#include "coordThread.h"
 
 
 /**********************************************************
@@ -50,6 +51,7 @@ protected:
     yarp::os::RpcServer rpcInPort;                                      // port to handle incoming commands
     ImThread *imThrd;
     DispThread *dispThrd;
+    CoordThread *coordThrd;
 
 
     /* ROS related types: */

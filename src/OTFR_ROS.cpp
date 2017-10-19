@@ -1,6 +1,6 @@
 /*
- * TOOL 3D FEATURE EXTRACTOR
- * Copyright (C) 2015 iCub Facility - Istituto Italiano di Tecnologia
+ * OnTheFlyRecognition_ROS
+ * Copyright (C) 2017 iCub Facility - Istituto Italiano di Tecnologia
  * Author: Tanis Mar
  * email: tanis.mar@iit.it
  * Permission is granted to copy, distribute, and/or modify this program
@@ -53,6 +53,8 @@ bool  OTFR_ROS::configure(ResourceFinder &rf)
     /* CONFIGURE ROS VARIABLES */
     //Threads
     if (img_flag){
+
+        // Start image conversion thread
         imThrd = new ImThread(50, "img");
         if (!imThrd->start())
         {
@@ -61,10 +63,12 @@ bool  OTFR_ROS::configure(ResourceFinder &rf)
             cout << "\nERROR!!! imThrd wasn't instantiated!!\n";
             return false;
         }
-        cout << "Img visualizer Thread istantiated..." << endl;
+        cout << "Img conversion thread istantiated..." << endl;
     }
 
     if (disp_flag){
+
+        // Start disparity image conversion thread
         dispThrd = new DispThread(50, "disp");
         if (!dispThrd->start())
         {
@@ -73,7 +77,21 @@ bool  OTFR_ROS::configure(ResourceFinder &rf)
             cout << "\nERROR!!! dispThrd wasn't instantiated!!\n";
             return false;
         }
-        cout << "Disp visualizer Thread istantiated..." << endl;
+        cout << "Disp conversion thread istantiated..." << endl;
+
+        // start coordinate conversion thread
+        coordThrd = new CoordThread(20, "coord");
+        if (!coordThrd->start())
+        {
+            delete coordThrd;
+            coordThrd = 0;
+            cout << "\nERROR!!! coordThrd wasn't instantiated!!\n";
+            return false;
+        }
+        cout << "Coordinate conversion thread istantiated..." << endl;
+
+
+
     }
 
     /* Module rpc parameters */
@@ -122,6 +140,11 @@ bool  OTFR_ROS::close()
         dispThrd->stop();
         delete dispThrd;
         dispThrd =  0;
+
+        coordThrd->stop();
+        delete coordThrd;
+        coordThrd =  0;
+
     }
 
     delete node_yarp;

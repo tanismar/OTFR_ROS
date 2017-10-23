@@ -37,7 +37,7 @@ void CoordThread::run()
         // Read coordinates from YARP port
         int u = coordBot->get(0).asList()->get(0).asInt();
         int v = coordBot->get(0).asList()->get(1).asInt();
-        cout << "Reading coordinates (" << u << ", " << v << ")." << endl;
+        //cout << "Reading coordinates (" << u << ", " << v << ")." << endl;
 
 
         // Write them into message and publish in ROS topic

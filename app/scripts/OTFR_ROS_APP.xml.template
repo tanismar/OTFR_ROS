@@ -1,6 +1,6 @@
 <application>
 
-    <name>OTFR_ROS</name>
+    <name>OTFR_ROS_APP</name>
 
     <dependencies>
         <port>/multisense/left/disparity_image</port>

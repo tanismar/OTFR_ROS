@@ -104,7 +104,7 @@ void coords_callback(const std_msgs::Int32MultiArray::ConstPtr& coords)
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "read_gaze");
+    ros::init(argc, argv, "track_blob");
     ros::NodeHandle nh;
 
     // Create Subscriber to Pointclouds from Multisense camera

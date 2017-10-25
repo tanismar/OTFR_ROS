@@ -203,5 +203,5 @@ include_directories(
 
 
 include_directories(include ${catkin_INCLUDE_DIRS})
-add_executable(read_gaze src/read_gaze.cpp)
-target_link_libraries(read_gaze ${catkin_LIBRARIES})
+add_executable(track_blob src/track_blob.cpp)
+target_link_libraries(track_blob ${catkin_LIBRARIES})

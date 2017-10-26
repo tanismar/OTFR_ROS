@@ -1,5 +1,7 @@
 # OTFR_ROS
-Bridge module to provide bidirectional communication between Walk-Man and the OnTheFlyRecognition Modules.
+Bridge module to provide bidirectional communication between Walk-Man and the OnTheFlyRecognition Modules, as can be seen in the following diagram:
+
+![OTFR_ROS_diagram](./OTFR_ROS_diagram.png)
 
 ## Description
 The `OTFR_ROS` module provides format conversion between ROS and YARP to allow the use of the OnTheFlyRecognition pipeline with the WALK-MAN robot. 

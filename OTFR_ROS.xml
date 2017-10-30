@@ -9,7 +9,7 @@
     <version>0.1</version>
     
     <description-long>
-    This module  performs ...
+    Bridge module to provide bidirectional communication between Walk-Man and the OnTheFlyRecognition Modules
     </description-long>
 
     <!-- <arguments> can have multiple <param> tags-->
@@ -35,26 +35,36 @@
         
         <input>
            <type>Image</type>
-           <port>/OTFR_ROS/data:i</port>
+           <port>/multisense/left/image_rect_color</port>
            <required>no</required>
            <priority>no</priority>
            <description>
-            Receive input data
+            Reads images from ROS topic
+           </description>
+       </input>
+       
+        <input>
+           <type>Disparity</type>
+           <port>/multisense/left/disparity_image</port>
+           <required>no</required>
+           <priority>no</priority>
+           <description>
+            Reads disparity images from ROS topic
            </description>
        </input>
                
         <input>
-           <type>Image</type>
-           <port>/OTFR_ROS/labels:i</port>
+           <type>Bottle</type>
+           <port>/OTFR_ROS/coords:i</port>
            <required>no</required>
            <priority>no</priority>
            <description>
-            Receive labels for data.
+            Port that receives 2D coordinates of closest blob.
            </description>
        </input>
         
        <input>
-           <type>Image</type>
+           <type>Bottle</type>
            <port>/OTFR_ROS/img:i</port>
            <required>no</required>
            <priority>no</priority>
@@ -69,14 +79,22 @@
            <type>Image</type>
            <port>/OTFR_ROS/img:o</port>
            <description>
-            Streams out an image
+            Streams out images
+           </description>
+       </output>
+       
+       <output>
+           <type>Image</type>
+           <port>/OTFR_ROS/img:o</port>
+           <description>
+            Streams out disparity images
            </description>
        </output>
        
         <output>
-            <type>Bottle</type>
-            <port carrier="tcp">/OTFR_ROS/labels:o</port>
-            <description> Sends out predicted data</description>
+            <type>rostopic std_msgs_Int32MultiArray</type>
+            <port carrier="tcp">/OTFR_ROS/coords_out</port>
+            <description> Writes on topic 2D cooridnates of closest blob</description>
         </output>
     </data>
 
@@ -89,7 +107,7 @@
     <development>
         <header></header>
         <library>YARP</library>
-        <library>OpenCV</library>
+        <library>ROS</library>
     </development>
 
 </module>

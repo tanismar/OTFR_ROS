@@ -27,12 +27,6 @@ service OTFR_ROS_IDLServer
     bool quit();
 
     /**
-     * Allows to modify online the number of possible actions
-     * @return true/false on success/failure
-     */
-    bool setnumact(1: i32 numAct);
-
-    /**
      * Activates/Deactivates more verbose execution of the module.
      * @return true/false on success/failure 
      */

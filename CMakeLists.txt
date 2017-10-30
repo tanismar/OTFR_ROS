@@ -7,18 +7,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 SET(PROJECTNAME OTFR_ROS)
 PROJECT(${PROJECTNAME})
 
-find_package(YARP)
-find_package(ICUBcontrib)
-list(APPEND CMAKE_MODULE_PATH ${YARP_MODULE_PATH})
-list(APPEND CMAKE_MODULE_PATH ${ICUBCONTRIB_MODULE_PATH})
-
-find_package(OpenCV)
-
-include(YarpInstallationHelpers)
-include(ICUBcontribHelpers)
-include(ICUBcontribOptions)
-icubcontrib_set_default_prefix()
-
 # add yarp definitions - this contains also -D_REENTRANT
 add_definitions(${YARP_DEFINES})   
 
@@ -38,11 +26,10 @@ source_group("IDL Files" FILES ${idl})
 
 include_directories(${PROJECT_SOURCE_DIR}/include
                     ${YARP_INCLUDE_DIRS}
-                    ${OpenCV_INCLUDE_DIRS}
                     )
 
 add_executable(${PROJECTNAME} ${source} ${header} ${idl})
-target_link_libraries(${PROJECTNAME} ${YARP_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(${PROJECTNAME} ${YARP_LIBRARIES} )
 install(TARGETS ${PROJECTNAME} DESTINATION bin)
 
 yarp_install(FILES ${PROJECTNAME}.xml DESTINATION ${ICUBCONTRIB_MODULES_INSTALL_DIR})
